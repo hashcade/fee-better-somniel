@@ -101,12 +101,13 @@ def verify_game(path: Path) -> int:
   cleaning = (ROOT / "src/cleaning.rs").read_text(encoding="utf-8") + (ROOT / "src/cleaning/automatic.rs").read_text(encoding="utf-8")
   settings = (ROOT / "src/settings.rs").read_text(encoding="utf-8")
   fishing = (ROOT / "src/fishing.rs").read_text(encoding="utf-8")
+  petting = (ROOT / "src/petting.rs").read_text(encoding="utf-8")
   cooking = (ROOT / "src/cooking.rs").read_text(encoding="utf-8")
   supports = (ROOT / "src/supports.rs").read_text(encoding="utf-8") + (ROOT / "src/supports/emblems.rs").read_text(encoding="utf-8")
   facilities = (ROOT / "src/facilities.rs").read_text(encoding="utf-8")
   shops = (ROOT / "src/shops.rs").read_text(encoding="utf-8")
   preferences = (ROOT / "src/preferences.rs").read_text(encoding="utf-8")
-  signatures = re.findall(r"\((0x[0-9A-Fa-f]+),\s*\[([^\]]+)\]\)", profile + meld_profile + activities + wyvern + collector + cleaning + settings + cooking + supports + facilities + shops + preferences + fishing)
+  signatures = re.findall(r"\((0x[0-9A-Fa-f]+),\s*\[([^\]]+)\]\)", profile + meld_profile + activities + wyvern + collector + cleaning + settings + cooking + supports + facilities + shops + preferences + fishing + petting)
   if not signatures:
     raise ValueError("no instruction signatures found")
   for address, values in signatures:
@@ -114,7 +115,7 @@ def verify_game(path: Path) -> int:
     offset = int(address, 16)
     if text[offset:offset + len(expected)] != expected:
       raise ValueError(f"instruction mismatch at {address}")
-  for name in ("polishing", "food", "emblem"):
+  for name in ("polishing", "food", "emblem", "petting"):
     fixture = (ROOT / f"scripts/{name}_fixture.py").read_text(encoding="utf-8")
     for address, body in re.findall(r'\((0x[0-9A-Fa-f]+), "([0-9a-f]+)"\)', fixture):
       expected = bytes.fromhex(body)

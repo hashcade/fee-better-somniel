@@ -10,6 +10,7 @@ pub mod facilities;
 pub mod fishing;
 pub mod labels;
 pub mod meld;
+pub mod petting;
 pub mod preferences;
 pub mod profile;
 pub mod random;

@@ -16,7 +16,7 @@ Somniel quality-of-life improvements for **Fire Emblem Engage 2.0.0**, using **C
 - **Fishing:** independently enable faster fishing and nondecreasing fishing uses.
 - **Minigames:** quickly finish muscle training with perfect results and Wyvern Ride at the current difficulty's SSS threshold, retaining normal records and rewards.
 - **Cooking:** use ingredients and additions at zero stock without consuming owned copies, allow repeat cooking, select a recruited chef and a native outcome, and shorten preparation.
-- **Sommie:** shorten feeding and petting, and feed at zero stock without consuming owned food. Retain native preferences and reward rules.
+- **Sommie:** automatically settle petting on Somniel arrival or menu opening, without an interaction scene. Retain native affection limits, bond fragment rewards and completion records. Shorten manual feeding and petting, and feed at zero stock without consuming owned food.
 
 ## Installation
 
@@ -40,13 +40,14 @@ Fully restart the game after installation or an update.
 
 ## Settings
 
-Open **Settings → Plugin Settings**. The fourteen preferences appear in one flat list, with native left/right controls and no extra footer descriptions.
+Open **Settings → Plugin Settings**. The fifteen preferences appear in one flat list, with native left/right controls and no extra footer descriptions.
 
 | Option | Default | Choices |
 | --- | --- | --- |
 | Automatic Supports | On | On / Off |
 | Auto Polish | On | On / Off |
 | Polishing Character | Alear | Joined ally |
+| Auto Pet Sommie | On | On / Off |
 | Standard Training Uses | 10 | Nondecreasing / 1–1000 |
 | Nondecreasing Fishing Uses | On | On / Off |
 | Batch Ring Count | 300 | 2–1000; step 10 |

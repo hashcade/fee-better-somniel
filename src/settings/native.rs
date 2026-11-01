@@ -30,6 +30,7 @@ const ITEM_NAMES: [&[u8]; OPTION_COUNT] = [
   b"SomnielFastFishing\0",
   b"SomnielFastTraining\0",
   b"SomnielFastWyvern\0",
+  b"SomnielAutoPet\0",
 ];
 
 extern "C" {
@@ -58,6 +59,7 @@ pub(crate) fn install() {
     create_option::<11>,
     create_option::<12>,
     create_option::<13>,
+    create_option::<14>,
   ];
   for kind in MENU_ORDER {
     unsafe { cobapi_register_configmenuitem_cb(callbacks[kind]) };
@@ -207,6 +209,7 @@ unsafe extern "C" fn command(item: Object, _: Method) {
         .unwrap_or_else(|| outcome_label(language, settings.cooking_outcome).to_owned()),
       3 => support_label(language, settings.auto_support).to_owned(),
       4 => support_label(language, settings.auto_polish).to_owned(),
+      14 => support_label(language, settings.auto_pet).to_owned(),
       5 => crate::roster::joined()
         .into_iter()
         .find(|entry| entry.0 == settings.polish_actor)
@@ -229,8 +232,12 @@ unsafe extern "C" fn change(item: Object, _: Method) -> i32 {
   let change: unsafe extern "C" fn(i32, i32, i32, i32, Method) -> i32 =
     unsafe { core::mem::transmute(base() + CHANGE_NUMBER) };
   match kind {
-    3 | 4 => {
-      let value = if kind == 3 { &mut settings.auto_support } else { &mut settings.auto_polish };
+    3 | 4 | 14 => {
+      let value = match kind {
+        3 => &mut settings.auto_support,
+        4 => &mut settings.auto_polish,
+        _ => &mut settings.auto_pet,
+      };
       let next = unsafe { change(i32::from(*value), 0, 1, 1, NONE) };
       if (0..=1).contains(&next) {
         *value = next == 1;

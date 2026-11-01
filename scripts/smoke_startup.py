@@ -24,6 +24,7 @@ from shop_fixture import ShopFixture
 from support_fixture import SupportFixture
 from emblem_fixture import EmblemFixture
 from polishing_fixture import PolishingFixture
+from petting_fixture import PettingFixture
 from food_fixture import exercise_food, FOOD_PATCHES
 
 
@@ -69,6 +70,7 @@ def smoke(data: bytes, case: str) -> int:
   fishing_profile = (ROOT / "src/fishing.rs").read_text(encoding="utf-8")
   cooking_profile = (ROOT / "src/cooking.rs").read_text(encoding="utf-8")
   support_profile = (ROOT / "src/supports.rs").read_text(encoding="utf-8") + (ROOT / "src/supports/emblems.rs").read_text(encoding="utf-8")
+  petting_profile = (ROOT / "src/petting.rs").read_text(encoding="utf-8")
   facility_profile = (ROOT / "src/facilities.rs").read_text(encoding="utf-8")
   shop_profile = (ROOT / "src/shops.rs").read_text(encoding="utf-8")
   preferences_profile = (ROOT / "src/preferences.rs").read_text(encoding="utf-8")
@@ -87,7 +89,7 @@ def smoke(data: bytes, case: str) -> int:
 
   signatures = [(int(address, 16), b"".join(
     struct.pack("<I", int(word, 16)) for word in re.findall(r"0x[0-9A-Fa-f]+", words)
-  )) for address, words in re.findall(r"\((0x[0-9A-Fa-f]+),\s*\[([^\]]+)\]\)", profile + meld_profile + activities + wyvern + collector + cleaning + settings_profile + cooking_profile + support_profile + facility_profile + shop_profile + preferences_profile + fishing_profile)]
+  )) for address, words in re.findall(r"\((0x[0-9A-Fa-f]+),\s*\[([^\]]+)\]\)", profile + meld_profile + activities + wyvern + collector + cleaning + settings_profile + cooking_profile + support_profile + facility_profile + shop_profile + preferences_profile + fishing_profile + petting_profile)]
   expected_cooking_hooks = {int(value, 16) for name, value in re.findall(
     r"pub const (\w+): usize = (0x[0-9A-Fa-f]+)", cooking_profile)
     if name in ("CURRENT_CHEF", "GET_COOK_DATA", "COOK", "DETERMINE_TASTE", "ANIMATION_CREATE")}
@@ -187,6 +189,8 @@ def smoke(data: bytes, case: str) -> int:
     settings_profile + cooking_profile + support_profile + cleaning + collector, profile)
   emblem_game = EmblemFixture(cpu, GAME, write_game,
     support_profile + cleaning + cooking_profile + collector, profile)
+  petting_game = PettingFixture(cpu, GAME, write_game,
+    petting_profile + settings_profile + cooking_profile + support_profile + collector, profile)
 
   def string_at(address: int) -> bytes:
     result = bytearray()
@@ -201,6 +205,8 @@ def smoke(data: bytes, case: str) -> int:
     nonlocal patch_failed, allocation_cursor
     if pc == STOP:
       cpu.emu_stop()
+      return
+    if petting_game.handle(pc, names.get(pc)):
       return
     if emblem_game.handle(pc, names.get(pc)):
       return
@@ -329,12 +335,12 @@ def smoke(data: bytes, case: str) -> int:
   if cpu.reg_read(registers.UC_ARM64_REG_PC) != STOP:
     raise AssertionError(f"{case}: initialization did not return")
   startup_patch_calls = patch_calls[:]
-  supported = case in ("supported", "emblems", "polishing", "shops", "supports", "facilities", "convenience", "menus", "mount_failed", "resource_stock_patch", "wrong_activity_instruction", "patch_failed") or case in configs
+  supported = case in ("supported", "emblems", "polishing", "petting", "shops", "supports", "facilities", "convenience", "menus", "mount_failed", "resource_stock_patch", "wrong_activity_instruction", "patch_failed") or case in configs
   expected = expected_hooks if supported else set()
   if set(hooks) != expected or len(hooks) != len(expected):
     raise AssertionError(f"{case}: incorrect hook registration: {hooks}")
   if supported:
-    assert len(settings_callbacks) == 14
+    assert len(settings_callbacks) == 15
     assert fs_calls.count("mount") == 1
     assert fs_calls.count("unmount") == (case != "mount_failed")
     assert fs_calls.count("close") == (case in configs)
@@ -354,6 +360,12 @@ def smoke(data: bytes, case: str) -> int:
         if name in ("HUB_INIT", "HUB_TICK")}
       polishing_game.exercise_polishing(support_hooks, replacements[next(iter(collector_hooks))])
       print("polishing: configurable cleaner, native bond caps/records, once-only settlement and Somniel-only/off paths passed modeled boundaries")
+    if case == "petting":
+      support_hooks = {name: replacements[int(value, 16)] for name, value in re.findall(
+        r"pub const (\w+): usize = (0x[0-9A-Fa-f]+)", support_profile)
+        if name in ("HUB_INIT", "HUB_TICK")}
+      petting_game.exercise_petting(settings_callbacks, support_hooks, STOP, STACK + 0x20000 - 0x20)
+      print("petting: native affection/wallet caps, total acquisition, once-only completion, off/non-Somniel paths and independent persistence passed")
     if case in ("supported", "supports", "supports_off", "menus"):
       support_hooks = {name: replacements[int(value, 16)] for name, value in re.findall(
         r"pub const (\w+): usize = (0x[0-9A-Fa-f]+)", support_profile)
@@ -452,7 +464,7 @@ def main() -> None:
   args = parser.parse_args()
   verify_nro(args.nro)
   for case in ("supported", "wrong_version", "wrong_build_id", "wrong_segment_layout",
-    "wrong_activity_instruction", "patch_failed", "menus", "resource_stock_patch", "supports_off", "emblems", "emblems_off", "polishing",
+    "wrong_activity_instruction", "patch_failed", "menus", "resource_stock_patch", "supports_off", "emblems", "emblems_off", "polishing", "petting",
     "mount_failed", "performance", "config_ten", "config_low", "config_custom", "config_high", "config_invalid", "config_utf8",
     "config_large", "config_short", "config_empty", "config_switches_off"):
     count = smoke(args.nro.read_bytes(), case)

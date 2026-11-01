@@ -34,6 +34,19 @@ pub fn title(language: i32) -> &'static str {
 pub(crate) mod native;
 
 pub fn option_title(language: i32, kind: usize) -> &'static str {
+  if kind == 14 {
+    return match language {
+      0 => "ソラを自動でなでる",
+      2 | 5 => "Caresses automatiques",
+      3 | 6 => "Caricias automáticas",
+      7 => "Automatisch streicheln",
+      8 => "Carezze automatiche",
+      9 => "自動撫摸索拉",
+      10 => "自动抚摸索拉",
+      11 => "솜이 자동 쓰다듬기",
+      _ => "Auto Pet Sommie",
+    };
+  }
   if kind == 4 || kind == 5 {
     return crate::cleaning::option_title(language, kind == 5);
   }
@@ -107,8 +120,8 @@ pub fn outcome_label(language: i32, option: u8) -> &'static str {
   labels[usize::from(option.saturating_sub(1).min(4))]
 }
 
-pub const OPTION_COUNT: usize = 14;
-pub const MENU_ORDER: [usize; OPTION_COUNT] = [3, 4, 5, 6, 7, 0, 8, 9, 11, 12, 13, 10, 1, 2];
+pub const OPTION_COUNT: usize = 15;
+pub const MENU_ORDER: [usize; OPTION_COUNT] = [3, 4, 5, 14, 6, 7, 0, 8, 9, 11, 12, 13, 10, 1, 2];
 
 pub fn feature_title(language: i32, feature: usize) -> &'static str {
   let labels = match language {

@@ -162,12 +162,12 @@ class SettingsFixture(CollectorFixture):
 
     self.invoke = call
 
-    order = [3, 4, 5, 6, 7, 0, 8, 9, 11, 12, 13, 10, 1, 2]
-    assert len(callbacks) == 14
-    self.factories = [callbacks[order.index(kind)] for kind in range(14)]
+    order = [3, 4, 5, 14, 6, 7, 0, 8, 9, 11, 12, 13, 10, 1, 2]
+    assert len(callbacks) == 15
+    self.factories = [callbacks[order.index(kind)] for kind in range(15)]
     items = [call(callback) for callback in callbacks]
     assert [self.read_string(self.pointer(item + 0x68)) for item in items] == [
-      "自动完成支援对话", "自动研磨", "研磨角色", "一般锻炼次数",
+      "自动完成支援对话", "自动研磨", "研磨角色", "自动抚摸索拉", "一般锻炼次数",
       "钓鱼次数不减", "牵绊戒指精炼次数", "商店库存无限", "礼物/食材不消耗", "快速钓鱼",
       "肌肉体操快速满分", "飞龙射手快速SSS", "重复料理", "料理厨师", "料理结果"]
     for kind, item in zip(order, items):
@@ -183,14 +183,14 @@ class SettingsFixture(CollectorFixture):
     def arrows():
       return [self.cpu.mem_read(item + 0x80, 1)[0] for item in items]
     assert not any(arrows())
-    # Invoke the pinned native callbacks across all fourteen rows, including
+    # Invoke the pinned native callbacks across all fifteen rows, including
     # first visits beyond the initial viewport, reverse traversal and wraps.
     saved = dict(self.files)
-    for index in [*range(14), *range(13, -1, -1), 13, 0]:
+    for index in [*range(15), *range(14, -1, -1), 14, 0]:
       item = items[index]
       cls = self.pointer(item)
       call(self.pointer(cls + 0x138 + 12 * 16), item)
-      assert arrows() == [int(i == index) for i in range(14)]
+      assert arrows() == [int(i == index) for i in range(15)]
       call(self.pointer(cls + 0x138 + 13 * 16), item)
       assert not any(arrows())
     assert self.files == saved

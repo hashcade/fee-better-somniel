@@ -42,6 +42,7 @@ fn extended_settings_round_trip_without_save_variables() {
     cooking_outcome: 3,
     auto_support: false,
     auto_polish: false,
+    auto_pet: false,
     polish_actor: "PID_パネトネ".to_owned(),
     ..Settings::default()
   };
@@ -56,6 +57,8 @@ fn extended_settings_round_trip_without_save_variables() {
     "auto_support=1\nauto_support=0",
     "auto_polish=2",
     "auto_polish=0\nauto_polish=1",
+    "auto_pet=2",
+    "auto_pet=0\nauto_pet=1",
     "polish_actor=",
     "polish_actor=IID_Food",
     "polish_actor=PID_a=b",
@@ -69,6 +72,7 @@ fn automatic_polishing_defaults_to_alear_and_keeps_legacy_files() {
   use fee_better_somniel::config::{parse_settings, DEFAULT_POLISHER};
   let settings = parse_settings("draw_count=300\n").unwrap();
   assert!(settings.auto_polish);
+  assert!(settings.auto_pet);
   assert_eq!(settings.polish_actor, DEFAULT_POLISHER);
   assert_eq!(settings.encode(), "draw_count=300\n");
 }

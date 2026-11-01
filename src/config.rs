@@ -20,6 +20,7 @@ pub struct Settings {
   pub cooking_outcome: u8,
   pub auto_support: bool,
   pub auto_polish: bool,
+  pub auto_pet: bool,
   pub polish_actor: String,
   /// Zero means nondecreasing, not zero available uses.
   pub arena_count: u32,
@@ -100,6 +101,7 @@ impl Default for Settings {
       cooking_outcome: 0,
       auto_support: true,
       auto_polish: true,
+      auto_pet: true,
       polish_actor: DEFAULT_POLISHER.to_owned(),
       arena_count: 10,
       fishing_unlimited: true,
@@ -141,6 +143,9 @@ impl Settings {
     if !self.auto_polish {
       result.push_str("auto_polish=0\n");
     }
+    if !self.auto_pet {
+      result.push_str("auto_pet=0\n");
+    }
     if self.polish_actor != DEFAULT_POLISHER {
       result.push_str(&format!("polish_actor={}\n", self.polish_actor));
     }
@@ -174,6 +179,11 @@ pub fn auto_support() -> bool {
 #[cfg(target_os = "switch")]
 pub fn auto_polish() -> bool {
   SETTINGS.with(|value| value.borrow().auto_polish)
+}
+
+#[cfg(target_os = "switch")]
+pub fn auto_pet() -> bool {
+  SETTINGS.with(|value| value.borrow().auto_pet)
 }
 
 #[cfg(target_os = "switch")]
@@ -233,16 +243,16 @@ pub fn parse_settings(contents: &str) -> Result<Settings, &'static str> {
       "cooking_outcome" => {
         settings.cooking_outcome = value.trim().parse().map_err(|_| "invalid cooking_outcome")?
       }
-      "auto_support" | "auto_polish" => {
+      "auto_support" | "auto_polish" | "auto_pet" => {
         let enabled = match value.trim() {
           "0" => false,
           "1" => true,
           _ => return Err("invalid automatic action switch"),
         };
-        if key == "auto_support" {
-          settings.auto_support = enabled;
-        } else {
-          settings.auto_polish = enabled;
+        match key {
+          "auto_support" => settings.auto_support = enabled,
+          "auto_polish" => settings.auto_polish = enabled,
+          _ => settings.auto_pet = enabled,
         }
       }
       _ => {
