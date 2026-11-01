@@ -20,8 +20,13 @@ The food fixture executes the NSO-pinned Sommie list-stock branch, both full nat
 
 Host tests verify that one shared setting controls all eight ordinary-gift/food patch sites without changing the Repeat Cooking quota, global stock methods or the special-ingredient effect test. Compiled callbacks toggle the shared stock behavior, restore its original gates and costs, persist across item recreation, and roll back after a failed configuration save. Existing `gift_stock` values remain effective; missing values default on and explicitly disabled files restore native behavior at startup.
 
+## Automatic Emblem conversation regression
+
+The Emblem fixture executes the compiled Somniel hooks against NSO-pinned GodUnit wrappers, GodBondHolder.Get, GodBond.CanTalk, GetRelianceLevel, GetNextLevelExpInternal and LevelUp bodies. External pool/initialization, dictionary, growth-data, skill-acquisition and record-storage APIs are modeled. Cover ready C/B/A steps, insufficient EXP, already completed talks, chapter caps, native lazy bond initialization without extra EXP, cached null bonds, linked Emblem GIDs, equipped/absent/unavailable Emblems, duplicate entries, native aptitude updates, once-only idle scanning, menu re-entry, failed native advancement, disabled auto_support and non-Somniel contexts. No dialogue or reward UI may be called or bound. The existing fourteen settings and hook set remain unchanged.
+
 ## Still requiring in-game checks
 
+- Automatic Emblem conversations on Somniel arrival/menu opening, including visible bond ranks, acquired skills/aptitudes and saved completion records. Confirm no conversation selector or result popup appears, and manual conversations retain normal playback.
 - Automatic polishing after loading/entering Somniel, including selected-character rewards and saved completion records.
 - Actual polishing list scrolling and individual cleaning; the removed synthetic row must not appear.
 - Retained facility navigation and resource-dependent scene setup.

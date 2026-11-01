@@ -22,6 +22,7 @@ from convenience_fixture import ConvenienceFixture
 from facility_fixture import FacilityFixture
 from shop_fixture import ShopFixture
 from support_fixture import SupportFixture
+from emblem_fixture import EmblemFixture
 from polishing_fixture import PolishingFixture
 from food_fixture import exercise_food, FOOD_PATCHES
 
@@ -67,7 +68,7 @@ def smoke(data: bytes, case: str) -> int:
   settings_profile = (ROOT / "src/settings.rs").read_text(encoding="utf-8")
   fishing_profile = (ROOT / "src/fishing.rs").read_text(encoding="utf-8")
   cooking_profile = (ROOT / "src/cooking.rs").read_text(encoding="utf-8")
-  support_profile = (ROOT / "src/supports.rs").read_text(encoding="utf-8")
+  support_profile = (ROOT / "src/supports.rs").read_text(encoding="utf-8") + (ROOT / "src/supports/emblems.rs").read_text(encoding="utf-8")
   facility_profile = (ROOT / "src/facilities.rs").read_text(encoding="utf-8")
   shop_profile = (ROOT / "src/shops.rs").read_text(encoding="utf-8")
   preferences_profile = (ROOT / "src/preferences.rs").read_text(encoding="utf-8")
@@ -170,6 +171,7 @@ def smoke(data: bytes, case: str) -> int:
     "config_utf8": b"\xff", "config_large": b" " * 4097,
     "config_short": b"draw_count=600\n", "config_empty": b"",
     "supports_off": b"auto_support=0\n",
+    "emblems_off": b"auto_support=0\n",
     "performance": b"draw_count=300\nchef=PID_performance\n",
     "config_switches_off": b"fishing_unlimited=0\nshop_stock=0\ngift_stock=0\nrepeat_cooking=0\nfast_fishing=0\nfast_training=0\nfast_wyvern=0\n"}
   text = TextFixture(cpu, GAME, STUB + 0xE000, write_game, offset)
@@ -183,6 +185,8 @@ def smoke(data: bytes, case: str) -> int:
   support_game = SupportFixture(cpu, GAME, write_game, support_profile + collector + cooking_profile, profile)
   polishing_game = PolishingFixture(cpu, GAME, write_game,
     settings_profile + cooking_profile + support_profile + cleaning + collector, profile)
+  emblem_game = EmblemFixture(cpu, GAME, write_game,
+    support_profile + cleaning + cooking_profile + collector, profile)
 
   def string_at(address: int) -> bytes:
     result = bytearray()
@@ -197,6 +201,8 @@ def smoke(data: bytes, case: str) -> int:
     nonlocal patch_failed, allocation_cursor
     if pc == STOP:
       cpu.emu_stop()
+      return
+    if emblem_game.handle(pc, names.get(pc)):
       return
     if polishing_game.handle(pc, names.get(pc)):
       return
@@ -323,7 +329,7 @@ def smoke(data: bytes, case: str) -> int:
   if cpu.reg_read(registers.UC_ARM64_REG_PC) != STOP:
     raise AssertionError(f"{case}: initialization did not return")
   startup_patch_calls = patch_calls[:]
-  supported = case in ("supported", "polishing", "shops", "supports", "facilities", "convenience", "menus", "mount_failed", "resource_stock_patch", "wrong_activity_instruction", "patch_failed") or case in configs
+  supported = case in ("supported", "emblems", "polishing", "shops", "supports", "facilities", "convenience", "menus", "mount_failed", "resource_stock_patch", "wrong_activity_instruction", "patch_failed") or case in configs
   expected = expected_hooks if supported else set()
   if set(hooks) != expected or len(hooks) != len(expected):
     raise AssertionError(f"{case}: incorrect hook registration: {hooks}")
@@ -333,7 +339,7 @@ def smoke(data: bytes, case: str) -> int:
     assert fs_calls.count("unmount") == (case != "mount_failed")
     assert fs_calls.count("close") == (case in configs)
     expected_count = {"config_ten": 10, "config_low": 2, "config_custom": 600, "config_high": 1000}.get(case, 300)
-    if case not in ("polishing", "shops", "supports", "supports_off", "facilities", "convenience", "menus", "performance"):
+    if case not in ("emblems", "emblems_off", "polishing", "shops", "supports", "supports_off", "facilities", "convenience", "menus", "performance"):
       draw_menu.exercise(replacements[offset("COUNT_MENU")], STOP,
         STACK + 0x20000 - 0x20, expected_count)
     if case in ("supported", "shops"):
@@ -355,6 +361,13 @@ def smoke(data: bytes, case: str) -> int:
       support_game.exercise(support_hooks, replacements[next(iter(collector_hooks))],
         STOP, STACK + 0x20000 - 0x20, enabled=case != "supports_off")
       print(f"{case}: direct supports use native level-up and achievement bodies without menus; Somniel-only and disabled paths passed")
+    if case in ("supported", "emblems", "emblems_off"):
+      support_hooks = {name: replacements[int(value, 16)] for name, value in re.findall(
+        r"pub const (\w+): usize = (0x[0-9A-Fa-f]+)", support_profile)
+        if name in ("HUB_INIT", "HUB_TICK")}
+      emblem_game.exercise(support_hooks, replacements[next(iter(collector_hooks))],
+        STOP, STACK + 0x20000 - 0x20, enabled=case != "emblems_off")
+      print(f"{case}: native Emblem C/B/A talks settle with abilities, aptitudes and records; no dialogue UI, duplicate grants or post-battle progression")
     if case in ("supported", "config_low", "config_custom", "config_high"):
       text.exercise(replacements[offset("BUILD_TEXT")], STOP, STACK + 0x20000 - 0x20,
         expected_count)
@@ -439,7 +452,7 @@ def main() -> None:
   args = parser.parse_args()
   verify_nro(args.nro)
   for case in ("supported", "wrong_version", "wrong_build_id", "wrong_segment_layout",
-    "wrong_activity_instruction", "patch_failed", "menus", "resource_stock_patch", "supports_off", "polishing",
+    "wrong_activity_instruction", "patch_failed", "menus", "resource_stock_patch", "supports_off", "emblems", "emblems_off", "polishing",
     "mount_failed", "performance", "config_ten", "config_low", "config_custom", "config_high", "config_invalid", "config_utf8",
     "config_large", "config_short", "config_empty", "config_switches_off"):
     count = smoke(args.nro.read_bytes(), case)

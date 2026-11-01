@@ -29,6 +29,7 @@ The synthetic Polish All row, its cloned GodItem class, list reordering, row-cou
 ## Other retained behavior
 
 - Native ordinary supports: CanLevelUp, UnitReliance.LevelUp and MyRoomRelianceCallSequence.UpdateAchive, only in Somniel.
+- Native Emblem conversations: the same automatic-support scan enumerates GodPool's used list and joined-unit bonds through GodBondHolder.Get, including its normal lazy initialization. GodUnit.CanTalk at `0x023305D0` owns readiness; only ordinary C/B/A steps are eligible. GodUnit.LevelUp at `0x02334310` retains ability acquisition and the native next-level baseline EXP. Do not add EXP or synthesize unlock/viewed flags. After a verified advance, retain UpdateState, Unit.InheritAptitude and AchieveData.SetClearReliance for the unit PID and resolved GodData GID, matching the native settlement at `0x02099730` without its presentation call. No new hook or setting is added.
 - Shops: scoped stock reads/decrements for unlocked armory, item-shop and flea-market entries.
 - Cooking: joined-chef selection, native taste definitions and shortened preparation. Load Cook messages before resolving taste display names, then release the text reference.
 - Fishing: independent speed patches and native use-decrement control.

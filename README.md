@@ -9,7 +9,7 @@ Somniel quality-of-life improvements for **Fire Emblem Engage 2.0.0**, using **C
 - **Polishing:** finish manual individual polishing with one action, or automatically polish eligible dirty rings and bracelets on Somniel arrival and exploration-menu opening. The cleaner is configurable, defaulting to Alear. Keep native bond caps and completion records, without an extra row in the original polishing list.
 - **Collection:** collect generated ground items, farm products, eligible animals and available ordinary villager gifts from the original exploration menu, in the Somniel or after battle. Keep donation/adoption requirements and return to the same menu after results.
 - **Facilities:** one outdoor entry opens Facilities / Activities / Shops, with 6 / 6 / 5 destinations. Preserve original facility unlocks. Manual polishing is available only through the actual Ring Chamber, not its outdoor shortcut.
-- **Relationships:** automatically complete ready ordinary C/B/A supports in the Somniel. Manually started support and Emblem bond conversations retain the original playback and skip controls. Story and Pact Ring events stay unchanged.
+- **Relationships:** automatically complete ready C/B/A character supports and Emblem bond conversations in the Somniel. Manually started conversations retain the original playback and skip controls. Story and Pact Ring events stay unchanged.
 - **Standard training:** choose 1–1000 uses or nondecreasing uses, defaulting to 10. Training battles use their original presentation.
 - **Shop stock:** independently enable unlimited unlocked armory, item-shop and flea-market stock. Keep prices and outfit/accessory ownership rules.
 - **Ordinary gifts:** give normal gifts at zero stock without consuming owned copies.

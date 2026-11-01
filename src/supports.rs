@@ -1,4 +1,7 @@
-//! Settle ready ordinary supports with native progression and achievement APIs.
+//! Settle ready supports and Emblem bonds through native progression APIs.
+
+#[cfg(target_os = "switch")]
+mod emblems;
 
 pub const RELATION: usize = 0x01C5A040;
 pub const CAN_ADVANCE: usize = 0x01C5A930;
@@ -179,6 +182,7 @@ pub(crate) mod native {
           );
         }
       }
+      super::emblems::settle(units);
     }
   }
 }

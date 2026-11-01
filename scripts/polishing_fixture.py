@@ -49,6 +49,7 @@ class PolishingFixture(ConvenienceFixture):
     elif name == "HUB_IS_MAIN": result = int(self.is_main)
     elif name in ("HUB_INIT", "HUB_TICK"): pass
     elif name == "RELATION": result = 0
+    elif name == "EMBLEM_BOND": result = 0  # Emblem progression has its own native fixture.
     elif name in ("HAS_BOND", "ADD_BOND", "GOD_DATA", "GET_DIRTY", "SET_DIRTY", "GET_STATE", "RECORD_POLISH"):
       return False  # Run the independently verified native function bodies.
     else:
