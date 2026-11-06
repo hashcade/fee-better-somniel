@@ -10,7 +10,7 @@ Somniel quality-of-life improvements for **Fire Emblem Engage 2.0.0**, using **C
 - **Collection:** collect generated ground items, farm products, eligible animals and available ordinary villager gifts from the original exploration menu, in the Somniel or after battle. Keep donation/adoption requirements and return to the same menu after results.
 - **Facilities:** one outdoor entry opens Facilities / Activities / Shops, with 6 / 6 / 5 destinations. Preserve original facility unlocks. Manual polishing is available only through the actual Ring Chamber, not its outdoor shortcut.
 - **Relationships:** automatically complete ready C/B/A character supports and Emblem bond conversations in the Somniel. Manually started conversations retain the original playback and skip controls. Story and Pact Ring events stay unchanged.
-- **Standard training:** choose 1–1000 uses or nondecreasing uses, defaulting to 10. Training battles use their original presentation.
+- **Arena training:** shortcut sessions skip standard and Emblem-training combat presentation, retaining native calculations, rewards, growth, costs and results. Entering the actual arena retains normal battles. Standard training offers 1–1000 uses or nondecreasing uses, defaulting to 10.
 - **Shop stock:** independently enable unlimited unlocked armory, item-shop and flea-market stock. Keep prices and outfit/accessory ownership rules.
 - **Ordinary gifts:** give normal gifts at zero stock without consuming owned copies.
 - **Fishing:** independently enable faster fishing and nondecreasing fishing uses.
@@ -74,7 +74,7 @@ Chef and Cooking Outcome default to the original rotation and roll. Recipe and r
 - [skyline-rs](https://github.com/ultimate-research/skyline-rs) — plugin runtime bindings.
 - [engage-il2cpp](https://github.com/DivineDragonFanClub/engage-il2cpp) — native interface references.
 - [KaitoB](https://tekqart.com/thread-327061-1-1.html) — original activity and gift patch references.
-- [Triabolical / MyCodeMods](https://github.com/triabolicals/triabolical-code-mods) — collection, facility and relationship-convenience behavior references.
+- [Triabolical / MyCodeMods](https://github.com/triabolicals/triabolical-code-mods) — collection, facility, arena and relationship-convenience behavior references.
 
 Fire Emblem and related names are trademarks of Nintendo and Intelligent Systems.
 This unofficial fan project is not affiliated with or endorsed by them.

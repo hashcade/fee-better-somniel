@@ -25,6 +25,7 @@ pub fn install() {
   crate::cooking::native::install();
   crate::supports::native::install();
   crate::facilities::native::install();
+  crate::arena::native::install();
   crate::shops::native::install();
 }
 

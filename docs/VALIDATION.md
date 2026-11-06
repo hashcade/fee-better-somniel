@@ -30,6 +30,8 @@ The petting fixture executes the compiled automatic-arrival hooks, all fifteen s
 
 ## Still requiring in-game checks
 
+- Shortcut arena battles: ordinary win/loss EXP and SP, paid bond growth/caps, fragment costs, achievements, quota consumption, equipment restoration, consecutive training and return to the shortcut page. Verify room-origin battles still play normally and manual bond conversations keep their native controls.
+
 - Automatic Emblem conversations on Somniel arrival/menu opening, including visible bond ranks, acquired skills/aptitudes and saved completion records. Confirm no conversation selector or result popup appears, and manual conversations retain normal playback.
 - Automatic polishing after loading/entering Somniel, including selected-character rewards and saved completion records.
 - Automatic Sommie petting after arrival/menu opening, including visible affection, fragment rewards, native per-visit completion after saving/reloading, and no repeated reward from manual petting.
@@ -41,3 +43,9 @@ The petting fixture executes the compiled automatic-arrival hooks, all fifteen s
 - Fifteen-row settings display, original training battles and coexistence with independent appearance mods.
 
 Do not describe an offline fixture result as proof that these live-game checks passed. Do not use or overwrite the user's main save for validation.
+
+## Shortcut arena regression
+
+The compiled fixture initializes the shortcut's private sequence class through the real facility callbacks, then executes NSO-pinned StartTraining and CreateBind bodies, native delegate/descriptor constructors and the Grow1/Grow2 coroutine bodies (including their original jump table). Allocation, binding, external growth APIs, message/pop-up APIs and frame timing are modeled; this does not run Unity or mutate a game save. Verify actual nonzero ordinary EXP arguments, win/loss cases, paid Emblem EXP, native level-up/aptitude API dispatch, ordinary support settlement, special flags, repeated sessions and unchanged room-origin descriptor arrays.
+
+The plugin changes only the fresh combat-child descriptor references. Keep both fades and all original growth callbacks exactly once. Parent resource setup, calculation, charging, equipment restoration, achievements, allowances and OnDispose remain unmodified. There are no additional settings, global coroutine patches, synthetic button presses or automatic dialogue skips.

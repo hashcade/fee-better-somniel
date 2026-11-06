@@ -163,6 +163,11 @@ pub(crate) mod native {
     skyline::install_hooks!(ring_menu);
   }
 
+  pub(crate) unsafe fn is_quick_arena(sequence: Object) -> bool {
+    !sequence.is_null()
+      && unsafe { field::<usize>(sequence, 0) } == SEQUENCE_CLASSES[10].load(Ordering::Relaxed)
+  }
+
   unsafe extern "C" fn hidden(_: Object, _: Method) -> i32 {
     4
   }

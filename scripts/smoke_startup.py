@@ -25,6 +25,7 @@ from support_fixture import SupportFixture
 from emblem_fixture import EmblemFixture
 from polishing_fixture import PolishingFixture
 from petting_fixture import PettingFixture
+from arena_fixture import ArenaFixture
 from food_fixture import exercise_food, FOOD_PATCHES
 
 
@@ -71,6 +72,7 @@ def smoke(data: bytes, case: str) -> int:
   cooking_profile = (ROOT / "src/cooking.rs").read_text(encoding="utf-8")
   support_profile = (ROOT / "src/supports.rs").read_text(encoding="utf-8") + (ROOT / "src/supports/emblems.rs").read_text(encoding="utf-8")
   petting_profile = (ROOT / "src/petting.rs").read_text(encoding="utf-8")
+  arena_profile = (ROOT / "src/arena.rs").read_text(encoding="utf-8")
   facility_profile = (ROOT / "src/facilities.rs").read_text(encoding="utf-8")
   shop_profile = (ROOT / "src/shops.rs").read_text(encoding="utf-8")
   preferences_profile = (ROOT / "src/preferences.rs").read_text(encoding="utf-8")
@@ -89,7 +91,7 @@ def smoke(data: bytes, case: str) -> int:
 
   signatures = [(int(address, 16), b"".join(
     struct.pack("<I", int(word, 16)) for word in re.findall(r"0x[0-9A-Fa-f]+", words)
-  )) for address, words in re.findall(r"\((0x[0-9A-Fa-f]+),\s*\[([^\]]+)\]\)", profile + meld_profile + activities + wyvern + collector + cleaning + settings_profile + cooking_profile + support_profile + facility_profile + shop_profile + preferences_profile + fishing_profile + petting_profile)]
+  )) for address, words in re.findall(r"\((0x[0-9A-Fa-f]+),\s*\[([^\]]+)\]\)", profile + meld_profile + activities + wyvern + collector + cleaning + settings_profile + cooking_profile + support_profile + facility_profile + shop_profile + preferences_profile + fishing_profile + petting_profile + arena_profile)]
   expected_cooking_hooks = {int(value, 16) for name, value in re.findall(
     r"pub const (\w+): usize = (0x[0-9A-Fa-f]+)", cooking_profile)
     if name in ("CURRENT_CHEF", "GET_COOK_DATA", "COOK", "DETERMINE_TASTE", "ANIMATION_CREATE")}
@@ -101,6 +103,7 @@ def smoke(data: bytes, case: str) -> int:
   expected_hooks.update(expected_cooking_hooks)
   expected_hooks.add(offset("PARAMETER"))
   expected_hooks.add(0x026FFF90)
+  expected_hooks.add(0x01CA3000)
   expected_hooks.update(int(value, 16) for name, value in re.findall(
     r"pub const (\w+): usize = (0x[0-9A-Fa-f]+)", shop_profile) if name != "LOOKUP")
   ring_menu = int(re.search(r"pub const RING_MENU: usize = (0x[0-9A-Fa-f]+)", facility_profile).group(1), 16)
@@ -183,6 +186,7 @@ def smoke(data: bytes, case: str) -> int:
   meld_dialog = MeldDialogFixture(cpu, GAME, write_game, meld_profile, profile)
   settings_game = ConvenienceFixture(cpu, GAME, write_game, settings_profile + cooking_profile + support_profile + fishing_profile, profile)
   facility_game = FacilityFixture(cpu, GAME, write_game, facility_profile + collector + support_profile, profile)
+  arena_game = ArenaFixture(cpu, GAME, write_game, facility_profile + collector + support_profile, profile)
   shop_game = ShopFixture(cpu, GAME, write_game, shop_profile, profile)
   support_game = SupportFixture(cpu, GAME, write_game, support_profile + collector + cooking_profile, profile)
   polishing_game = PolishingFixture(cpu, GAME, write_game,
@@ -205,6 +209,8 @@ def smoke(data: bytes, case: str) -> int:
     nonlocal patch_failed, allocation_cursor
     if pc == STOP:
       cpu.emu_stop()
+      return
+    if arena_game.handle(pc, names.get(pc)):
       return
     if petting_game.handle(pc, names.get(pc)):
       return
@@ -335,7 +341,7 @@ def smoke(data: bytes, case: str) -> int:
   if cpu.reg_read(registers.UC_ARM64_REG_PC) != STOP:
     raise AssertionError(f"{case}: initialization did not return")
   startup_patch_calls = patch_calls[:]
-  supported = case in ("supported", "emblems", "polishing", "petting", "shops", "supports", "facilities", "convenience", "menus", "mount_failed", "resource_stock_patch", "wrong_activity_instruction", "patch_failed") or case in configs
+  supported = case in ("supported", "emblems", "polishing", "petting", "arena", "shops", "supports", "facilities", "convenience", "menus", "mount_failed", "resource_stock_patch", "wrong_activity_instruction", "patch_failed") or case in configs
   expected = expected_hooks if supported else set()
   if set(hooks) != expected or len(hooks) != len(expected):
     raise AssertionError(f"{case}: incorrect hook registration: {hooks}")
@@ -345,6 +351,10 @@ def smoke(data: bytes, case: str) -> int:
     assert fs_calls.count("unmount") == (case != "mount_failed")
     assert fs_calls.count("close") == (case in configs)
     expected_count = {"config_ten": 10, "config_low": 2, "config_custom": 600, "config_high": 1000}.get(case, 300)
+    if case == "arena":
+      arena_game.exercise_arena(replacements[next(iter(collector_hooks))], replacements[ring_menu],
+        replacements[0x01CA3000], STOP, STACK + 0x20000 - 0x20, facility_profile)
+      print("arena: native construction, nonzero ordinary EXP, native growth, paid bonding, repeated sessions and room-origin exclusion passed modeled boundaries")
     if case not in ("emblems", "emblems_off", "polishing", "shops", "supports", "supports_off", "facilities", "convenience", "menus", "performance"):
       draw_menu.exercise(replacements[offset("COUNT_MENU")], STOP,
         STACK + 0x20000 - 0x20, expected_count)
@@ -464,7 +474,7 @@ def main() -> None:
   args = parser.parse_args()
   verify_nro(args.nro)
   for case in ("supported", "wrong_version", "wrong_build_id", "wrong_segment_layout",
-    "wrong_activity_instruction", "patch_failed", "menus", "resource_stock_patch", "supports_off", "emblems", "emblems_off", "polishing", "petting",
+    "wrong_activity_instruction", "patch_failed", "menus", "resource_stock_patch", "supports_off", "emblems", "emblems_off", "polishing", "petting", "arena",
     "mount_failed", "performance", "config_ten", "config_low", "config_custom", "config_high", "config_invalid", "config_utf8",
     "config_large", "config_short", "config_empty", "config_switches_off"):
     count = smoke(args.nro.read_bytes(), case)
