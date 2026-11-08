@@ -81,9 +81,9 @@ pub struct MenuGroup {
 // One outdoor entry opens these categories; all destination lists fit the
 // original prefab without custom scrolling or additional outdoor entries.
 pub const GROUPS: &[MenuGroup] = &[
-  MenuGroup { facilities: &[0, 1, 2, 3, 9, 10] },
-  MenuGroup { facilities: &[11, 12, 13, 14, 15, 16] },
-  MenuGroup { facilities: &[4, 5, 6, 7, 8] },
+  MenuGroup { facilities: &[0, 2, 10, 1, 3, 9] },
+  MenuGroup { facilities: &[12, 11, 13, 15, 16, 14] },
+  MenuGroup { facilities: &[5, 4, 6, 7, 8] },
 ];
 
 pub fn group_title(language: i32, group: usize) -> &'static str {
